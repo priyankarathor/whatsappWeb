@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { gsap } from "gsap";
 import { motion } from "framer-motion";
 import {
-  Briefcase,
+  // Briefcase,
   CheckSquare,
   FileText,
   LayoutDashboard,
@@ -20,13 +20,13 @@ const allNavItems = [
   { id: "live-chat", label: "Live Chat", path: "/live-chat", icon: MessageCircleMore },
   { id: "task", label: "Task", path: "/task", icon: CheckSquare },
   { id: "contacts", label: "Contacts", path: "/contacts", icon: Users },
-  {
-    id: "hr",
-    label: "HR",
-    path: "/HR",
-    icon: Briefcase,
-    allowedRoles: ["super_admin", "manager", "user"],
-  },
+  // {
+  //   id: "hr",
+  //   label: "HR",
+  //   path: "/HR",
+  //   icon: Briefcase,
+  //   allowedRoles: ["super_admin", "manager", "user"],
+  // },
   {
     id: "campaigns",
     label: "Campaigns",

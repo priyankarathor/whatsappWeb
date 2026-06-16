@@ -143,7 +143,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState(null);
   const [chat, setChat] = useState([]);
-  const [supportOpen, setSupportOpen] = useState(false);
+  const [supportOpen] = useState(false);
   const [ticketsModalOpen, setTicketsModalOpen] = useState(false);
   const [selectedTicketId, setSelectedTicketId] = useState(null);
   const [supportInput, setSupportInput] = useState("");
@@ -496,7 +496,7 @@ export default function SettingsPage() {
       : issue.label;
     const message = buildIssueMessage(issue, typedMessage);
 
-    setSupportOpen(true);
+    window.dispatchEvent(new Event("openSupportChat"));
     setCreatingTicket(true);
     setChat((prev) => [
       ...prev,
@@ -975,216 +975,7 @@ export default function SettingsPage() {
     </section>
   );
 
-  const renderSupportWidget = () => (
-    <>
-      <button
-        type="button"
-        className="support-chat-launcher"
-        onClick={() => setSupportOpen(true)}
-        title="Open support chat"
-        style={{
-          position: "fixed",
-          right: 28,
-          bottom: 28,
-          width: 54,
-          height: 54,
-          borderRadius: "50%",
-          border: "none",
-          background: "#14b87a",
-          color: "#fff",
-          display: supportOpen ? "none" : "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          boxShadow: "0 18px 38px rgba(20,184,122,0.32)",
-          cursor: "pointer",
-          zIndex: 60,
-        }}
-      >
-        <MessageSquare size={24} />
-        {supportUnreadCount > 0 && (
-          <span style={{
-            position: "absolute",
-            top: -4,
-            right: -4,
-            minWidth: 20,
-            height: 20,
-            borderRadius: 999,
-            background: "#ef4444",
-            color: "#fff",
-            border: `2px solid ${colors.panel}`,
-            fontSize: 11,
-            fontWeight: 900,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "0 5px",
-          }}>
-            {supportUnreadCount}
-          </span>
-        )}
-      </button>
-
-      {supportOpen && (
-        <div
-          className="support-chat-panel"
-          style={{
-            position: "fixed",
-            right: 28,
-            bottom: 28,
-            width: "min(500px, calc(100vw - 32px))",
-            maxHeight: "min(720px, calc(100vh - 96px))",
-            borderRadius: 18,
-            overflow: "hidden",
-            background: colors.panel,
-            border: `1px solid ${colors.border}`,
-            boxShadow: isDark ? "0 26px 70px rgba(0,0,0,0.52)" : "0 26px 70px rgba(15,23,42,0.18)",
-            display: "flex",
-            flexDirection: "column",
-            zIndex: 70,
-          }}
-        >
-          <div style={{ padding: "18px 20px", display: "flex", alignItems: "center", gap: 12 }}>
-            <span style={{
-              width: 38,
-              height: 38,
-              borderRadius: "50%",
-              background: "#14b87a",
-              color: "#fff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}>
-              <Bot size={20} />
-            </span>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ color: colors.text, fontWeight: 850, fontSize: 16 }}>Customer Support</div>
-              <div style={{ color: colors.muted, fontSize: 12 }}>{activeUserTicket ? "Replying in your active ticket" : "Tickets and replies in one chat"}</div>
-            </div>
-            <button type="button" onClick={refreshSupportTickets} title="Refresh" style={iconButtonStyle(colors)}>
-              <RefreshCcw size={18} />
-            </button>
-            <button type="button" onClick={() => setSupportOpen(false)} title="Minimize" style={iconButtonStyle(colors)}>
-              <X size={18} />
-            </button>
-          </div>
-
-          <div style={{
-            padding: "0 20px 12px",
-            color: colors.muted,
-            fontSize: 13,
-            lineHeight: 1.5,
-            textAlign: "center",
-          }}>
-            {activeUserTicket
-              ? "You have an active ticket. Messages you send here are added to the same chat until support ends it."
-              : "Pick an issue to create a ticket. When support replies, the answer appears here automatically."}
-          </div>
-
-          <div style={{
-            flex: 1,
-            overflowY: "auto",
-            padding: "10px 20px 16px",
-            display: "flex",
-            flexDirection: "column",
-            gap: 10,
-            background: isDark ? "#0b1220" : "#f8fafc",
-            borderTop: `1px solid ${colors.border}`,
-            borderBottom: `1px solid ${colors.border}`,
-          }}>
-            {supportChat.map((msg, index) => (
-              <div key={`${msg.by}-${index}`} style={{
-                display: "flex",
-                justifyContent: msg.by === "user" ? "flex-end" : "flex-start",
-              }}>
-                <div style={{
-                  maxWidth: "84%",
-                  borderRadius: msg.by === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-                  background: msg.by === "user" ? colors.accentSoft : colors.panel,
-                  color: msg.by === "user" ? (isDark ? "#d1fae5" : colors.accent) : colors.text,
-                  border: `1px solid ${msg.by === "user" ? colors.accent : colors.border}`,
-                  padding: "10px 12px",
-                  fontSize: 14,
-                  lineHeight: 1.5,
-                  whiteSpace: "pre-wrap",
-                }}>
-                  <div>{msg.text}</div>
-                  {msg.meta && <div style={{ color: colors.muted, fontSize: 11, marginTop: 5 }}>{msg.meta}</div>}
-                </div>
-              </div>
-            ))}
-            <div ref={chatEndRef} />
-          </div>
-
-          <div style={{ padding: 16, display: "grid", gap: 12 }}>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {ISSUE_CATEGORIES.map((issue) => (
-                <button
-                  key={issue.id}
-                  type="button"
-                  disabled={creatingTicket}
-                  onClick={() => chooseIssue(issue)}
-                  style={{
-                    border: `1px solid ${colors.border}`,
-                    background: colors.panel2,
-                    color: colors.text,
-                    borderRadius: 999,
-                    padding: "8px 12px",
-                    fontSize: 12,
-                    fontWeight: 750,
-                    cursor: creatingTicket ? "not-allowed" : "pointer",
-                    opacity: creatingTicket ? 0.7 : 1,
-                  }}
-                >
-                  {activeUserTicket ? `Reply: ${issue.label}` : issue.label}
-                </button>
-              ))}
-            </div>
-            <div style={{ display: "flex", gap: 8 }}>
-              <input
-                value={supportInput}
-                onChange={(e) => setSupportInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    sendSupportInput();
-                  }
-                }}
-                placeholder={activeUserTicket ? "Reply to your active ticket..." : "Type your issue..."}
-                disabled={creatingTicket}
-                style={{
-                  ...fieldStyle,
-                  height: 42,
-                  borderRadius: 999,
-                  padding: "0 14px",
-                }}
-              />
-              <button
-                type="button"
-                disabled={creatingTicket || !supportInput.trim()}
-                onClick={sendSupportInput}
-                style={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: "50%",
-                  border: "none",
-                  background: colors.accent,
-                  color: "#fff",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: creatingTicket || !supportInput.trim() ? "not-allowed" : "pointer",
-                  opacity: creatingTicket || !supportInput.trim() ? 0.6 : 1,
-                  flexShrink: 0,
-                }}
-              >
-                <Send size={17} />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
+  const renderSupportWidget = () => null;
 
   const getTicketIssueLabel = (ticket) =>
     ISSUE_CATEGORIES.find((item) => item.id === ticket.category)?.label || ticket.category || "Support";
@@ -1441,7 +1232,7 @@ export default function SettingsPage() {
           </p>
         </div>
         <div style={{ display: "flex", gap: 9, flexWrap: "wrap" }}>
-          <button type="button" onClick={() => setSupportOpen(true)} style={{ ...buttonBase, background: colors.accent, color: "#fff" }}>
+          <button type="button" onClick={() => window.dispatchEvent(new Event("openSupportChat"))} style={{ ...buttonBase, background: colors.accent, color: "#fff" }}>
             <MessageSquare size={16} /> Open Chat
           </button>
           {supportStaff && (

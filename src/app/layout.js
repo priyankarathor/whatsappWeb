@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Sidebar from "./componets/sidebar";
 import Topbar from "./componets/Topbar";
 import BottomTabs from "./componets/BottomTabs";
+import SupportChatWidget from "./componets/SupportChatWidget";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const PALETTE = [
@@ -299,6 +300,7 @@ useEffect(() => {
 
         {/* ✅ hidden prop keeps BottomTabs in sync with Topbar */}
         <BottomTabs hidden={hideChrome} />
+        <SupportChatWidget user={currentUser} hidden={hideChrome} />
       </body>
     </html>
   );
